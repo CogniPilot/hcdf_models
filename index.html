@@ -52,19 +52,27 @@
 
     <div class="board">
         <h3>MR-MCXN-T1</h3>
-        <p>MCU development board with T1 Ethernet connectivity.</p>
         <div class="files">
             <p><strong>HCDF Fragments:</strong></p>
             <ul>
-                <li><a href="mr_mcxn_t1/optical-flow/optical-flow.hcdf">optical-flow/optical-flow.hcdf</a> - PMW3901 optical flow sensor</li>
-                <li><a href="mr_mcxn_t1/rtk-gnss/rtk-gnss.hcdf">rtk-gnss/rtk-gnss.hcdf</a> - u-blox ZED-F9P RTK GNSS</li>
-                <li><a href="mr_mcxn_t1/default/default.hcdf">default/default.hcdf</a> - Base board configuration</li>
+                <li><a href="mr_mcxn_t1/default/default.hcdf">default/default.hcdf</a></li>
+                <li><a href="mr_mcxn_t1/flex-io/flex-io.hcdf">flex-io/flex-io.hcdf</a></li>
+                <li><a href="mr_mcxn_t1/optical-flow/optical-flow.hcdf">optical-flow/optical-flow.hcdf</a></li>
+                <li><a href="mr_mcxn_t1/rtk-gnss/rtk-gnss.hcdf">rtk-gnss/rtk-gnss.hcdf</a></li>
             </ul>
-            <p><strong>Models:</strong></p>
+        </div>
+    </div>
+
+    <h2>Models</h2>
+    <div class="board">
+        <div class="files">
             <ul>
-                <li><a href="models/fbf4836d-mcxnt1hub.glb">fbf4836d-mcxnt1hub.glb</a></li>
-                <li><a href="models/72eef172-optical_flow.glb">72eef172-optical_flow.glb</a></li>
                 <li><a href="models/47b58869-rtk_f9p.glb">47b58869-rtk_f9p.glb</a></li>
+                <li><a href="models/72eef172-optical_flow.glb">72eef172-optical_flow.glb</a></li>
+                <li><a href="models/86d9c8c8-mcxnt1hub_base.glb">86d9c8c8-mcxnt1hub_base.glb</a></li>
+                <li><a href="models/95e587b1-flex_io.glb">95e587b1-flex_io.glb</a></li>
+                <li><a href="models/c07cf1f4-mcxnt1hub_spacer.glb">c07cf1f4-mcxnt1hub_spacer.glb</a></li>
+                <li><a href="models/fbf4836d-mcxnt1hub.glb">fbf4836d-mcxnt1hub.glb</a></li>
             </ul>
         </div>
     </div>
@@ -85,7 +93,7 @@ https://hcdf.cognipilot.org/{board}/{device}/{sha}-{device}.hcdf</pre>
 
     <h2>HCDF Schema</h2>
     <p>
-        HCDF files follow the <a href="https://github.com/CogniPilot/cps_describe">CPS Describe</a> schema.
+        HCDF files follow the <a href="https://github.com/CogniPilot/hcdformat">HCDF schema</a>.
         Each fragment defines visuals (3D models) and reference frames for a specific board/application combination.
     </p>
 
