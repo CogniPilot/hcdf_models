@@ -118,12 +118,11 @@ jobs:
                 content=$(echo "$content" | sed -E "s|href=\"[^\"]*$original\"|href=\"models/$sha_prefixed\"|g")
                 content=$(echo "$content" | sed -E "s|href='[^']*$original'|href='models/$sha_prefixed'|g")
 
-                # Add or update sha attribute
-                # If model tag has sha attribute, update it
-                content=$(echo "$content" | sed -E "s|(<model[^>]*href=\"models/$sha_prefixed\"[^>]*)sha=\"[^\"]*\"|\\1sha=\"$full_sha\"|g")
-                # If model tag doesn't have sha attribute, add it
-                content=$(echo "$content" | sed -E "s|(<model[^>]*href=\"models/$sha_prefixed\")([^s][^h][^a])|\\1 sha=\"$full_sha\"\\2|g")
-                content=$(echo "$content" | sed -E "s|(<model[^>]*href=\"models/$sha_prefixed\")/?>|\\1 sha=\"$full_sha\"/>|g")
+                # Remove any existing sha attribute from model tags with this href
+                content=$(echo "$content" | sed -E "s|(<model[^>]*href=\"models/$sha_prefixed\"[^>]*) sha=\"[^\"]*\"|\\1|g")
+
+                # Add sha attribute before the closing /> or >
+                content=$(echo "$content" | sed -E "s|(<model[^>]*href=\"models/$sha_prefixed\")(/?>)|\\1 sha=\"$full_sha\"\\2|g")
               fi
             done
 
