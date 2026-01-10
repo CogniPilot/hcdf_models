@@ -1,0 +1,7 @@
+# Copyright (c) 2025 CogniPilot Foundation
+# SPDX-License-Identifier: Apache-2.0
+
+build:
+  cmake: cmake
+  settings:
+    dts_root: .

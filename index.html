@@ -39,13 +39,14 @@
 
     <h2>Repository Structure</h2>
     <p>
+        HCDF files are organized by board and device type, with SHA-prefixed versions for immutability:
+    </p>
+    <pre>{board}/{device}/{sha}-{device}.hcdf   # SHA-prefixed version (immutable)
+{board}/{device}/{device}.hcdf          # Symlink to latest version</pre>
+    <p>
         Models are stored in a flat <code>models/</code> directory with SHA-prefixed filenames:
     </p>
     <pre>models/{short_sha}-{name}.glb</pre>
-    <p>
-        This enables version coexistence and cache deduplication. The same model content
-        always has the same SHA prefix, so it's only stored once.
-    </p>
 
     <h2>Available Boards</h2>
 
@@ -55,9 +56,9 @@
         <div class="files">
             <p><strong>HCDF Fragments:</strong></p>
             <ul>
-                <li><a href="mr_mcxn_t1/optical-flow.hcdf">optical-flow.hcdf</a> - PMW3901 optical flow sensor</li>
-                <li><a href="mr_mcxn_t1/rtk-gnss.hcdf">rtk-gnss.hcdf</a> - u-blox ZED-F9P RTK GNSS</li>
-                <li><a href="mr_mcxn_t1/default.hcdf">default.hcdf</a> - Base board configuration</li>
+                <li><a href="mr_mcxn_t1/optical-flow/optical-flow.hcdf">optical-flow/optical-flow.hcdf</a> - PMW3901 optical flow sensor</li>
+                <li><a href="mr_mcxn_t1/rtk-gnss/rtk-gnss.hcdf">rtk-gnss/rtk-gnss.hcdf</a> - u-blox ZED-F9P RTK GNSS</li>
+                <li><a href="mr_mcxn_t1/default/default.hcdf">default/default.hcdf</a> - Base board configuration</li>
             </ul>
             <p><strong>Models:</strong></p>
             <ul>
@@ -70,9 +71,13 @@
 
     <h2>URL Format</h2>
     <p>
-        Devices report their HCDF URL via MCUmgr. The URL format is:
+        Devices report their HCDF URL via MCUmgr. URL formats:
     </p>
-    <pre>https://hcdf.cognipilot.org/{board}/{app}.hcdf</pre>
+    <pre># Latest version (uses symlink):
+https://hcdf.cognipilot.org/{board}/{device}/{device}.hcdf
+
+# Pinned version (immutable):
+https://hcdf.cognipilot.org/{board}/{device}/{sha}-{device}.hcdf</pre>
     <p>
         Models are referenced from HCDF files with their SHA-prefixed paths:
     </p>

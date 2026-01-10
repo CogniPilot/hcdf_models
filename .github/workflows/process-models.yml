@@ -119,27 +119,38 @@ jobs:
             done
 
             # Determine target directory from HCDF filename
-            # Expected format: {board}-{app}.hcdf or {board}_{app}.hcdf
-            # Extract board name (everything before first - or _ that's followed by more text)
-            if [[ "$filename" =~ ^([^-_]+)[-_](.+)\.hcdf$ ]]; then
+            # Expected format: {board}-{device}.hcdf (e.g., mr_mcxn_t1-optical-flow.hcdf)
+            # Extract board name (first part with underscores) and device name (rest with hyphens)
+            if [[ "$filename" =~ ^([a-z0-9_]+)-([a-z0-9-]+)\.hcdf$ ]]; then
               board="${BASH_REMATCH[1]}"
-              app_part="${BASH_REMATCH[2]}"
-              target_dir="$board"
-              # Convert underscores to hyphens in app name for consistency
-              target_name="${app_part//_/-}.hcdf"
+              device="${BASH_REMATCH[2]}"
+              target_dir="$board/$device"
+              target_name="$device.hcdf"
             else
-              # Fallback: use filename without extension as board, name it default.hcdf
-              board="${filename%.hcdf}"
-              target_dir="$board"
-              target_name="default.hcdf"
+              # Fallback: use filename without extension as device in "unknown" board
+              device="${filename%.hcdf}"
+              target_dir="unknown/$device"
+              target_name="$device.hcdf"
+              echo "  Warning: Could not parse board from filename, using 'unknown' board"
             fi
 
             # Create target directory
             mkdir -p "$target_dir"
 
-            # Write updated HCDF
-            echo "$content" > "$target_dir/$target_name"
-            echo "  Moved to: $target_dir/$target_name"
+            # Compute SHA of the updated HCDF content
+            hcdf_sha=$(echo "$content" | sha256sum | cut -c1-8)
+            sha_prefixed_hcdf="${hcdf_sha}-${target_name}"
+
+            # Write SHA-prefixed HCDF file
+            echo "$content" > "$target_dir/$sha_prefixed_hcdf"
+            echo "  Created: $target_dir/$sha_prefixed_hcdf"
+
+            # Create symlink for latest version
+            cd "$target_dir"
+            rm -f "$target_name"
+            ln -s "$sha_prefixed_hcdf" "$target_name"
+            cd - > /dev/null
+            echo "  Symlink: $target_dir/$target_name -> $sha_prefixed_hcdf"
 
             # Remove from process_request
             rm "$hcdf"
