@@ -6,7 +6,7 @@
     <!-- Flex IO board visual (minimal geometry) -->
     <visual name="flex-io_board">
       <pose>0 0 -0.0008 1.5708 0 1.5708</pose>
-      <model href="models/95e587b1-flex_io.glb" sha="95e587b14373cebe0a680a6be3bbade59bd7a76ed2cf29a2c9a39396e3ccaf5c" sha="95e587b14373cebe0a680a6be3bbade59bd7a76ed2cf29a2c9a39396e3ccaf5c"/>
+      <model href="models/flex_io.glb" sha=""/>
     </visual>
 
     <!-- MCXN947 T1 Hub board visual (minimal geometry) -->
