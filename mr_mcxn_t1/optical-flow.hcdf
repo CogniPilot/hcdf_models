@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<hcdf version="1.2">
+  <comp name="optical-flow-assembly" role="sensor">
+    <description>PMW3901 optical flow sensor on MR-MCXN-T1</description>
+
+    <!-- Board visual -->
+    <visual name="board">
+      <pose>0 0 0 0 0 0</pose>
+      <model href="models/fbf4836d-mcxnt1hub.glb" sha="fbf4836d0f0893ab576da89311ce8ff03d9db51383c5c3b980c1b2f9d62469fb"/>
+    </visual>
+
+    <!-- Sensor visual - mounted underneath, rotated 180 degrees around X -->
+    <visual name="sensor">
+      <pose>0 0 -0.005 3.14159 0 0</pose>
+      <model href="models/72eef172-optical_flow.glb" sha="72eef1724ebbf6d7df57edba6465ef9e35ac25a4db10365ef29b9a2b39d0636a"/>
+    </visual>
+
+    <!-- Reference frames -->
+    <frame name="flow">
+      <description>PMW3901 optical flow sensor frame</description>
+      <pose>0 0 -0.005 3.14159 0 0</pose>
+    </frame>
+
+    <frame name="board_origin">
+      <description>Board origin at center</description>
+      <pose>0 0 0 0 0 0</pose>
+    </frame>
+  </comp>
+</hcdf>

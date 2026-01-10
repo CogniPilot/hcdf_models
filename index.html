@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CogniPilot HCDF Models</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+            color: #333;
+        }
+        h1 { color: #1a1a1a; }
+        h2 { color: #444; margin-top: 2rem; }
+        .board {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .board h3 { margin-top: 0; color: #2563eb; }
+        .files { font-family: monospace; font-size: 0.9rem; }
+        .files a { color: #2563eb; text-decoration: none; }
+        .files a:hover { text-decoration: underline; }
+        code { background: #e5e5e5; padding: 0.2rem 0.4rem; border-radius: 4px; }
+        pre { background: #e5e5e5; padding: 1rem; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>CogniPilot HCDF Models</h1>
+    <p>
+        Hardware Configuration Descriptive Format (HCDF) files and 3D models for CogniPilot hardware.
+        These files are used by <a href="https://github.com/CogniPilot/dendrite">Dendrite</a> for 3D visualization.
+    </p>
+
+    <h2>Repository Structure</h2>
+    <p>
+        Models are stored in a flat <code>models/</code> directory with SHA-prefixed filenames:
+    </p>
+    <pre>models/{short_sha}-{name}.glb</pre>
+    <p>
+        This enables version coexistence and cache deduplication. The same model content
+        always has the same SHA prefix, so it's only stored once.
+    </p>
+
+    <h2>Available Boards</h2>
+
+    <div class="board">
+        <h3>MR-MCXN-T1</h3>
+        <p>MCU development board with T1 Ethernet connectivity.</p>
+        <div class="files">
+            <p><strong>HCDF Fragments:</strong></p>
+            <ul>
+                <li><a href="mr_mcxn_t1/optical-flow.hcdf">optical-flow.hcdf</a> - PMW3901 optical flow sensor</li>
+                <li><a href="mr_mcxn_t1/rtk-gnss.hcdf">rtk-gnss.hcdf</a> - u-blox ZED-F9P RTK GNSS</li>
+                <li><a href="mr_mcxn_t1/default.hcdf">default.hcdf</a> - Base board configuration</li>
+            </ul>
+            <p><strong>Models:</strong></p>
+            <ul>
+                <li><a href="models/fbf4836d-mcxnt1hub.glb">fbf4836d-mcxnt1hub.glb</a></li>
+                <li><a href="models/72eef172-optical_flow.glb">72eef172-optical_flow.glb</a></li>
+                <li><a href="models/47b58869-rtk_f9p.glb">47b58869-rtk_f9p.glb</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <h2>URL Format</h2>
+    <p>
+        Devices report their HCDF URL via MCUmgr. The URL format is:
+    </p>
+    <pre>https://hcdf.cognipilot.org/{board}/{app}.hcdf</pre>
+    <p>
+        Models are referenced from HCDF files with their SHA-prefixed paths:
+    </p>
+    <pre>&lt;model href="models/{short_sha}-{name}.glb" sha="{full_sha}"/&gt;</pre>
+
+    <h2>HCDF Schema</h2>
+    <p>
+        HCDF files follow the <a href="https://github.com/CogniPilot/cps_describe">CPS Describe</a> schema.
+        Each fragment defines visuals (3D models) and reference frames for a specific board/application combination.
+    </p>
+
+    <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #ddd; color: #666; font-size: 0.9rem;">
+        <p>CogniPilot Project - <a href="https://cognipilot.org">cognipilot.org</a></p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,174 @@
+name: Process New Models
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'process_request/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Process new models and HCDFs
+        run: |
+          #!/bin/bash
+          set -e
+
+          PROCESS_DIR="process_request"
+          MODELS_DIR="models"
+
+          # Exit if process_request doesn't exist or is empty
+          if [ ! -d "$PROCESS_DIR" ] || [ -z "$(ls -A $PROCESS_DIR 2>/dev/null)" ]; then
+            echo "No files to process in $PROCESS_DIR"
+            exit 0
+          fi
+
+          mkdir -p "$MODELS_DIR"
+
+          # Track what we processed
+          declare -A PROCESSED_GLBS  # original_name -> sha_prefixed_name
+          declare -a HCDF_FILES
+
+          # First pass: Process all GLB files
+          echo "=== Processing GLB files ==="
+          for glb in "$PROCESS_DIR"/*.glb; do
+            [ -f "$glb" ] || continue
+
+            filename=$(basename "$glb")
+            echo "Processing: $filename"
+
+            # Compute SHA256
+            full_sha=$(sha256sum "$glb" | cut -d' ' -f1)
+            short_sha="${full_sha:0:8}"
+
+            # Check if filename already has correct SHA prefix
+            if [[ "$filename" =~ ^([a-f0-9]{8})-(.+)$ ]]; then
+              existing_sha="${BASH_REMATCH[1]}"
+              base_name="${BASH_REMATCH[2]}"
+
+              if [ "$existing_sha" = "$short_sha" ]; then
+                echo "  Already has correct SHA prefix: $filename"
+                sha_prefixed_name="$filename"
+              else
+                echo "  Updating SHA prefix: $existing_sha -> $short_sha"
+                sha_prefixed_name="${short_sha}-${base_name}"
+              fi
+            else
+              # No SHA prefix, add one
+              base_name="$filename"
+              sha_prefixed_name="${short_sha}-${filename}"
+              echo "  Adding SHA prefix: $sha_prefixed_name"
+            fi
+
+            # Store mapping for HCDF updates (both with and without old prefix)
+            PROCESSED_GLBS["$filename"]="$sha_prefixed_name"
+            PROCESSED_GLBS["$base_name"]="$sha_prefixed_name"
+
+            # Move to models directory
+            target="$MODELS_DIR/$sha_prefixed_name"
+            if [ -f "$target" ]; then
+              echo "  Model already exists: $target (skipping)"
+              rm "$glb"
+            else
+              mv "$glb" "$target"
+              echo "  Moved to: $target"
+            fi
+          done
+
+          # Second pass: Process all HCDF files
+          echo ""
+          echo "=== Processing HCDF files ==="
+          for hcdf in "$PROCESS_DIR"/*.hcdf; do
+            [ -f "$hcdf" ] || continue
+
+            filename=$(basename "$hcdf")
+            echo "Processing: $filename"
+
+            # Read the HCDF content
+            content=$(cat "$hcdf")
+
+            # Update model references
+            # Match: href="..." or href='...' containing .glb
+            for original in "${!PROCESSED_GLBS[@]}"; do
+              sha_prefixed="${PROCESSED_GLBS[$original]}"
+
+              # Extract the full SHA for this model
+              full_sha=$(sha256sum "$MODELS_DIR/$sha_prefixed" 2>/dev/null | cut -d' ' -f1 || echo "")
+
+              if [ -n "$full_sha" ]; then
+                # Update href to use models/ path with SHA-prefixed name
+                # Handle various href formats
+                content=$(echo "$content" | sed -E "s|href=\"[^\"]*$original\"|href=\"models/$sha_prefixed\"|g")
+                content=$(echo "$content" | sed -E "s|href='[^']*$original'|href='models/$sha_prefixed'|g")
+
+                # Add or update sha attribute
+                # If model tag has sha attribute, update it
+                content=$(echo "$content" | sed -E "s|(<model[^>]*href=\"models/$sha_prefixed\"[^>]*)sha=\"[^\"]*\"|\\1sha=\"$full_sha\"|g")
+                # If model tag doesn't have sha attribute, add it
+                content=$(echo "$content" | sed -E "s|(<model[^>]*href=\"models/$sha_prefixed\")([^s][^h][^a])|\\1 sha=\"$full_sha\"\\2|g")
+                content=$(echo "$content" | sed -E "s|(<model[^>]*href=\"models/$sha_prefixed\")/?>|\\1 sha=\"$full_sha\"/>|g")
+              fi
+            done
+
+            # Determine target directory from HCDF filename
+            # Expected format: {board}-{app}.hcdf or {board}_{app}.hcdf
+            # Extract board name (everything before first - or _ that's followed by more text)
+            if [[ "$filename" =~ ^([^-_]+)[-_](.+)\.hcdf$ ]]; then
+              board="${BASH_REMATCH[1]}"
+              app_part="${BASH_REMATCH[2]}"
+              target_dir="$board"
+              # Convert underscores to hyphens in app name for consistency
+              target_name="${app_part//_/-}.hcdf"
+            else
+              # Fallback: use filename without extension as board, name it default.hcdf
+              board="${filename%.hcdf}"
+              target_dir="$board"
+              target_name="default.hcdf"
+            fi
+
+            # Create target directory
+            mkdir -p "$target_dir"
+
+            # Write updated HCDF
+            echo "$content" > "$target_dir/$target_name"
+            echo "  Moved to: $target_dir/$target_name"
+
+            # Remove from process_request
+            rm "$hcdf"
+          done
+
+          # Clean up any remaining files (warn about them)
+          remaining=$(ls "$PROCESS_DIR" 2>/dev/null | wc -l)
+          if [ "$remaining" -gt 0 ]; then
+            echo ""
+            echo "=== Warning: Unprocessed files remaining ==="
+            ls -la "$PROCESS_DIR"
+          fi
+
+          # Remove process_request if empty
+          rmdir "$PROCESS_DIR" 2>/dev/null || true
+
+          echo ""
+          echo "=== Processing complete ==="
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Process new models and HCDFs"
+            git push
+          fi

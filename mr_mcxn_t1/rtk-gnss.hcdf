@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<hcdf version="1.2">
+  <comp name="rtk-gnss-assembly" role="sensor">
+    <description>u-blox ZED-F9P RTK GNSS on MR-MCXN-T1</description>
+
+    <!-- Board visual -->
+    <visual name="board">
+      <pose>0 0 0 0 0 0</pose>
+      <model href="models/fbf4836d-mcxnt1hub.glb" sha="fbf4836d0f0893ab576da89311ce8ff03d9db51383c5c3b980c1b2f9d62469fb"/>
+    </visual>
+
+    <!-- GNSS module visual - mounted on top -->
+    <visual name="gnss">
+      <pose>0 0 0.008 0 0 0</pose>
+      <model href="models/47b58869-rtk_f9p.glb" sha="47b588690d523ca237ca05da463035e951c55ccdcd4865f230fd64ab984f2e28"/>
+    </visual>
+
+    <!-- Reference frames -->
+    <frame name="gnss_antenna">
+      <description>GNSS antenna phase center</description>
+      <pose>0 0 0.025 0 0 0</pose>
+    </frame>
+
+    <frame name="board_origin">
+      <description>Board origin at center</description>
+      <pose>0 0 0 0 0 0</pose>
+    </frame>
+  </comp>
+</hcdf>
