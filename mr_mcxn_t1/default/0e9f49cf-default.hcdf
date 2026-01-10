@@ -1,23 +1,28 @@
 <?xml version="1.0"?>
 <hcdf version="1.2">
   <comp name="mr-mcxn-t1" role="mcu">
-    <description>MR-MCXN-T1 development board</description>
+    <description>MCXN947 T1 hub</description>
 
-    <!-- Board visual -->
-    <visual name="board">
-      <pose>0 0 0 0 0 0</pose>
+    <!-- MCXN947 T1 Hub board visual (minimal geometry) -->
+    <visual name="hub_board">
+      <pose>0 0 0 1.5708 0 1.5708</pose>
       <model href="models/fbf4836d-mcxnt1hub.glb" sha="fbf4836d0f0893ab576da89311ce8ff03d9db51383c5c3b980c1b2f9d62469fb"/>
     </visual>
 
     <!-- Reference frames -->
     <frame name="board_origin">
-      <description>Board origin at center</description>
+      <description>Main board origin (spinali_mcxn_t1_hub_link)</description>
       <pose>0 0 0 0 0 0</pose>
     </frame>
 
-    <frame name="ethernet">
-      <description>T1 Ethernet connector</description>
-      <pose>0.02 0 0 0 0 0</pose>
+    <frame name="imu_icm45686_hub">
+      <description>ICM-45686 IMU on hub board</description>
+      <pose>0.016125 -0.00085 0.00195 0 0 0</pose>
+    </frame>
+
+    <frame name="mag_bmm350_hub">
+      <description>BMM350 magnetometer on hub board</description>
+      <pose>0.02085 0.00064 −0.00035 0 0 0</pose>
     </frame>
   </comp>
 </hcdf>
