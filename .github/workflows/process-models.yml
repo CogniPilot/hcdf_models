@@ -363,7 +363,4 @@ EOF
     needs: process
     if: needs.process.outputs.changes == 'true'
     uses: ./.github/workflows/pages.yml
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
+    secrets: inherit
