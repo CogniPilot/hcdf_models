@@ -104,3 +104,70 @@ endfunction()
 function(hcdf_get_local_path BOARD DEVICE OUT_VAR)
   set(${OUT_VAR} "${ZEPHYR_HCDF_MODELS_MODULE_DIR}/${BOARD}/${DEVICE}/${DEVICE}.hcdf" PARENT_SCOPE)
 endfunction()
+
+# Function to validate HCDF SHA from Kconfig against the actual HCDF file
+# Call this after Kconfig has been processed (i.e., after find_package(Zephyr))
+# Usage:
+#   hcdf_validate_sha(BOARD mr_mcxn_t1 DEVICE optical-flow)
+function(hcdf_validate_sha)
+  cmake_parse_arguments(HCDF "" "BOARD;DEVICE" "" ${ARGN})
+
+  if(NOT HCDF_BOARD)
+    message(FATAL_ERROR "hcdf_validate_sha: BOARD is required")
+  endif()
+  if(NOT HCDF_DEVICE)
+    message(FATAL_ERROR "hcdf_validate_sha: DEVICE is required")
+  endif()
+
+  # Get the SHA from Kconfig (set in prj.conf)
+  if(NOT DEFINED CONFIG_MCUMGR_GRP_HCDF_SHA)
+    message(STATUS "HCDF: CONFIG_MCUMGR_GRP_HCDF_SHA not defined, skipping validation")
+    return()
+  endif()
+  set(KCONFIG_SHA "${CONFIG_MCUMGR_GRP_HCDF_SHA}")
+
+  # Get the actual SHA from the local HCDF file
+  set(LOCAL_HCDF "${ZEPHYR_HCDF_MODELS_MODULE_DIR}/${HCDF_BOARD}/${HCDF_DEVICE}/${HCDF_DEVICE}.hcdf")
+
+  if(NOT EXISTS "${LOCAL_HCDF}")
+    message(WARNING "HCDF: Local file not found at ${LOCAL_HCDF}, cannot validate SHA")
+    return()
+  endif()
+
+  # Resolve symlink to get the actual file
+  get_filename_component(REAL_HCDF "${LOCAL_HCDF}" REALPATH)
+  get_filename_component(REAL_NAME "${REAL_HCDF}" NAME)
+
+  # Extract SHA from filename (format: {sha}-{name}.hcdf)
+  string(REGEX MATCH "^([a-f0-9]+)-" SHA_MATCH "${REAL_NAME}")
+  if(SHA_MATCH)
+    string(REGEX REPLACE "^([a-f0-9]+)-.*" "\\1" FILE_SHA "${REAL_NAME}")
+  else()
+    # Fall back to computing SHA from file content
+    hcdf_compute_short_sha("${REAL_HCDF}" FILE_SHA)
+  endif()
+
+  # Compare SHAs
+  if(NOT "${KCONFIG_SHA}" STREQUAL "${FILE_SHA}")
+    # Get the app path relative to the workspace root (e.g., spinali/)
+    # APPLICATION_SOURCE_DIR is the full path, we need it relative to where west runs from
+    get_filename_component(WORKSPACE_DIR "${APPLICATION_SOURCE_DIR}/../.." REALPATH)
+    file(RELATIVE_PATH APP_REL_PATH "${WORKSPACE_DIR}" "${APPLICATION_SOURCE_DIR}")
+    message(WARNING
+      "\n"
+      "========================================\n"
+      "HCDF SHA MISMATCH DETECTED!\n"
+      "========================================\n"
+      "  Board:       ${HCDF_BOARD}\n"
+      "  Device:      ${HCDF_DEVICE}\n"
+      "  prj.conf:    ${KCONFIG_SHA}\n"
+      "  hcdf_models: ${FILE_SHA}\n"
+      "\n"
+      "To fix, run:\n"
+      "  sed -i 's/CONFIG_MCUMGR_GRP_HCDF_SHA=\"${KCONFIG_SHA}\"/CONFIG_MCUMGR_GRP_HCDF_SHA=\"${FILE_SHA}\"/' ${APP_REL_PATH}/prj.conf\n"
+      "========================================\n"
+    )
+  else()
+    message(STATUS "HCDF: SHA validation passed (${KCONFIG_SHA})")
+  endif()
+endfunction()
