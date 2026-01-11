@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<hcdf version="2.0">
+  <comp name="optical-flow-assembly" role="sensor">
+    <description>Spinali optical flow sensor assembly with MCXN947 T1 hub</description>
+
+    <!-- ========== PORTS ========== -->
+
+    <!-- T1 Ethernet port on hub board -->
+    <port name="ETH0" type="ethernet">
+      <pose>0.0225 -0.0155 -0.0085 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.006 0.004 0.003</size>
+        </box>
+      </geometry>
+    </port>
+
+    <!-- CAN port on hub board -->
+    <port name="CAN0" type="CAN">
+      <pose>-0.0225 -0.0155 -0.0085 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.005 0.004 0.003</size>
+        </box>
+      </geometry>
+      <geometry>
+        <box>
+          <size>0.005 0.004 0.003</size>
+        </box>
+      </geometry>
+    </port>
+
+    <!-- ========== SENSORS ========== -->
+
+    <!-- ICM-45686 IMU on hub board (800Hz, primary) -->
+    <sensor name="imu_hub">
+      <inertial type="accel_gyro">
+        <pose>0.016125 -0.00085 -0.0075 0 0 0</pose>
+        <driver name="icm45686">
+          <axis-align x="X" y="Y" z="Z"/>
+        </driver>
+      </inertial>
+    </sensor>
+
+    <!-- ICM-45686 IMU on optical flow board (400Hz, secondary) -->
+    <sensor name="imu_of_main_test_rotate">
+      <inertial type="accel_gyro">
+        <pose>-0.0188 0 0.00125 -1.5708 0 0</pose>
+        <driver name="icm45686">
+          <axis-align x="X" y="Z" z="-Y"/>
+        </driver>
+      </inertial>
+    </sensor>
+
+    <!-- ICM-42688 IMU on optical flow board (legacy/backup) -->
+    <sensor name="imu_of_secondary">
+      <inertial type="accel_gyro">
+        <pose>0.0083 0 0.00125 0 0 0</pose>
+        <driver name="icm42688">
+          <axis-align x="X" y="Y" z="Z"/>
+        </driver>
+      </inertial>
+    </sensor>
+
+    <!-- BMM350 magnetometer on hub board -->
+    <sensor name="mag_hub">
+      <em type="mag">
+        <pose>0.02085 0.00064 -0.0098 0 0 0</pose>
+        <driver name="bmm350">
+          <axis-align x="X" y="Y" z="Z"/>
+        </driver>
+      </em>
+    </sensor>
+
+    <!-- BMP581 barometer on hub board -->
+    <sensor name="baro_hub">
+      <force type="pressure">
+        <pose>0.015 0.005 -0.0095 0 0 0</pose>
+        <driver name="bmp581"/>
+      </force>
+    </sensor>
+
+    <!-- PAA3905 optical flow sensor -->
+    <sensor name="optical_flow">
+      <optical type="optical_flow">
+        <pose>-0.0005 -0.0002 0.002125 0 0 0</pose>
+        <driver name="paa3905"/>
+        <geometry>
+          <cone>
+            <radius>0.30</radius>
+            <length>1.0</length>
+          </cone>
+        </geometry>
+      </optical>
+    </sensor>
+
+    <!-- AFBR-S50 time-of-flight sensor (8x8 array) -->
+    <sensor name="tof">
+      <optical type="tof">
+        <pose>-0.008 0 0.003 0 0 0</pose>
+        <driver name="afbr_s50"/>
+        <geometry>
+          <frustum>
+            <near>0.001</near>
+            <far>0.30</far>
+            <hfov>0.1047</hfov>
+            <vfov>0.1047</vfov>
+          </frustum>
+        </geometry>
+      </optical>
+    </sensor>
+
+    <!-- ========== VISUALS ========== -->
+
+    <!-- Optical flow board PCB -->
+    <visual name="optical_flow_board">
+      <pose>0 0 -0.0008 1.5708 0 1.5708</pose>
+      <model href="models/72eef172-optical_flow.glb" sha="72eef1724ebbf6d7df57edba6465ef9e35ac25a4db10365ef29b9a2b39d0636a"/>
+    </visual>
+
+    <!-- MCXN947 T1 Hub board PCB -->
+    <visual name="hub_board">
+      <pose>0 0 -0.00945 1.5708 0 1.5708</pose>
+      <model href="models/fbf4836d-mcxnt1hub.glb" sha="fbf4836d0f0893ab576da89311ce8ff03d9db51383c5c3b980c1b2f9d62469fb"/>
+    </visual>
+
+    <!-- Case visuals (toggle group) -->
+    <visual name="mcxnt1hub_spacer" toggle="case">
+      <pose>0.020 -0.01525 -0.0008 0 3.14159 0</pose>
+      <model href="models/c07cf1f4-mcxnt1hub_spacer.glb" sha="c07cf1f44bb4a6a6e778e94bdae3a9a380243a52acdbed5ff5d79b58d27ef6ac"/>
+    </visual>
+
+    <visual name="mcxnt1hub_base" toggle="case">
+      <pose>0 0 -0.014 0 3.14159 -1.5708</pose>
+      <model href="models/86d9c8c8-mcxnt1hub_base.glb" sha="86d9c8c84b18be7582be497788cfff9dd1c1801d31d0e855335dc3c155003c75"/>
+    </visual>
+
+    <!-- ========== REFERENCE FRAMES ========== -->
+
+    <frame name="board_origin">
+      <description>Main board origin (spinali_optical_flow_link)</description>
+      <pose>0 0 0 0 0 0</pose>
+    </frame>
+
+  </comp>
+</hcdf>
