@@ -1,0 +1,152 @@
+#!/bin/bash
+# Process models and HCDFs locally (same logic as GitHub Actions workflow)
+set -e
+
+cd "$(dirname "$0")/.."
+
+PROCESS_DIR="process_request"
+MODELS_DIR="models"
+
+# Check if process_request exists and has files (other than .gitkeep)
+HAS_FILES=false
+if [ -d "$PROCESS_DIR" ]; then
+  for f in "$PROCESS_DIR"/*; do
+    [ -f "$f" ] && [ "$(basename "$f")" != ".gitkeep" ] && HAS_FILES=true && break
+  done
+fi
+
+if [ "$HAS_FILES" = "false" ]; then
+  echo "No files to process in $PROCESS_DIR"
+  exit 0
+fi
+
+mkdir -p "$MODELS_DIR"
+
+# Track what we processed
+declare -A PROCESSED_GLBS  # original_name -> sha_prefixed_name
+
+# First pass: Process all GLB files
+echo "=== Processing GLB files ==="
+for glb in "$PROCESS_DIR"/*.glb; do
+  [ -f "$glb" ] || continue
+
+  filename=$(basename "$glb")
+  echo "Processing: $filename"
+
+  # Compute SHA256
+  full_sha=$(sha256sum "$glb" | cut -d' ' -f1)
+  short_sha="${full_sha:0:8}"
+
+  # Check if filename already has correct SHA prefix
+  if [[ "$filename" =~ ^([a-f0-9]{8})-(.+)$ ]]; then
+    existing_sha="${BASH_REMATCH[1]}"
+    base_name="${BASH_REMATCH[2]}"
+
+    if [ "$existing_sha" = "$short_sha" ]; then
+      echo "  Already has correct SHA prefix: $filename"
+      sha_prefixed_name="$filename"
+    else
+      echo "  Updating SHA prefix: $existing_sha -> $short_sha"
+      sha_prefixed_name="${short_sha}-${base_name}"
+    fi
+  else
+    # No SHA prefix, add one
+    base_name="$filename"
+    sha_prefixed_name="${short_sha}-${filename}"
+    echo "  Adding SHA prefix: $sha_prefixed_name"
+  fi
+
+  # Store mapping for HCDF updates (both with and without old prefix)
+  PROCESSED_GLBS["$filename"]="$sha_prefixed_name"
+  PROCESSED_GLBS["$base_name"]="$sha_prefixed_name"
+
+  # Move to models directory
+  target="$MODELS_DIR/$sha_prefixed_name"
+  if [ -f "$target" ]; then
+    echo "  Model already exists: $target (skipping)"
+    rm "$glb"
+  else
+    mv "$glb" "$target"
+    echo "  Moved to: $target"
+  fi
+done
+
+# Second pass: Process all HCDF files
+echo ""
+echo "=== Processing HCDF files ==="
+for hcdf in "$PROCESS_DIR"/*.hcdf; do
+  [ -f "$hcdf" ] || continue
+
+  filename=$(basename "$hcdf")
+  echo "Processing: $filename"
+
+  # Read the HCDF content
+  content=$(cat "$hcdf")
+
+  # Update model references
+  for original in "${!PROCESSED_GLBS[@]}"; do
+    sha_prefixed="${PROCESSED_GLBS[$original]}"
+
+    # Extract the full SHA for this model
+    full_sha=$(sha256sum "$MODELS_DIR/$sha_prefixed" 2>/dev/null | cut -d' ' -f1 || echo "")
+
+    if [ -n "$full_sha" ]; then
+      # Update href to use models/ path with SHA-prefixed name
+      content=$(echo "$content" | sed -E "s|href=\"[^\"]*$original\"|href=\"models/$sha_prefixed\"|g")
+      content=$(echo "$content" | sed -E "s|href='[^']*$original'|href='models/$sha_prefixed'|g")
+
+      # Remove any existing sha attribute from model tags with this href
+      content=$(echo "$content" | sed -E "s|(<model[^>]*href=\"models/$sha_prefixed\"[^>]*) sha=\"[^\"]*\"|\\1|g")
+
+      # Add sha attribute before the closing /> or >
+      content=$(echo "$content" | sed -E "s|(<model[^>]*href=\"models/$sha_prefixed\")(/?>)|\\1 sha=\"$full_sha\"\\2|g")
+    fi
+  done
+
+  # Determine target directory from HCDF filename
+  # Expected format: {board}-{device}.hcdf (e.g., mr_mcxn_t1-optical-flow.hcdf)
+  if [[ "$filename" =~ ^([a-z0-9_]+)-([a-z0-9-]+)\.hcdf$ ]]; then
+    board="${BASH_REMATCH[1]}"
+    device="${BASH_REMATCH[2]}"
+    target_dir="$board/$device"
+    target_name="$device.hcdf"
+  else
+    # Fallback: use filename without extension as device in "unknown" board
+    device="${filename%.hcdf}"
+    target_dir="unknown/$device"
+    target_name="$device.hcdf"
+    echo "  Warning: Could not parse board from filename, using 'unknown' board"
+  fi
+
+  # Create target directory
+  mkdir -p "$target_dir"
+
+  # Compute SHA of the updated HCDF content
+  hcdf_sha=$(echo "$content" | sha256sum | cut -c1-8)
+  sha_prefixed_hcdf="${hcdf_sha}-${target_name}"
+
+  # Write SHA-prefixed HCDF file
+  echo "$content" > "$target_dir/$sha_prefixed_hcdf"
+  echo "  Created: $target_dir/$sha_prefixed_hcdf"
+
+  # Create symlink for latest version
+  cd "$target_dir"
+  rm -f "$target_name"
+  ln -s "$sha_prefixed_hcdf" "$target_name"
+  cd - > /dev/null
+  echo "  Symlink: $target_dir/$target_name -> $sha_prefixed_hcdf"
+
+  # Remove from process_request
+  rm "$hcdf"
+done
+
+# Update index.html
+echo ""
+echo "=== Updating index.html ==="
+.github/scripts/update-index.sh
+
+echo ""
+echo "=== Processing complete ==="
+echo ""
+echo "Files processed. You can now commit with:"
+echo "  git add -A && git commit -s -m 'Process new models and HCDFs'"
