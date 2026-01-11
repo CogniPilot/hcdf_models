@@ -166,7 +166,7 @@
 
     <visual name="mcxnt1hub_base" toggle="case">
       <pose>0 0 -0.014 0 3.14159 -1.5708</pose>
-      <model href="models/86d9c8c8-mcxnt1hub_base.glb" sha="86d9c8c84b18be7582be497788cfff9dd1c1801d31d0e855335dc3c155003c75"/>
+      <model href="models/fc0bc0ac-mcxnt1hub_base.glb" sha="fc0bc0acf368879671c3b21e0ca06ff8ec43219f6d706ea3b019dfda4bbbe14b"/>
     </visual>
 
     <!-- ========== REFERENCE FRAMES ========== -->
