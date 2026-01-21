@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<hcdf version="2.0">
+  <comp name="navq95-assembly" role="compute">
+    <description>An IMX95 based robotics development board with integrated sensors</description>
+
+    <!-- ========== PORTS ========== -->
+    <port name="end1_1" type="ethernet" visual="t1s_board" mesh="port1">
+      <capabilities>
+        <speed unit="Mbps">1000</speed>
+        <standard>1000BASE-T1</standard>
+        <protocol>TSN</protocol>
+        <connector>Harting T1 Ind</connector>
+      </capabilities>
+    </port>
+    <port name="end1_2" type="ethernet" visual="t1s_board" mesh="port2">
+      <capabilities>
+        <speed unit="Mbps">1000</speed>
+        <standard>1000BASE-T1</standard>
+        <protocol>TSN</protocol>
+        <connector>Harting T1 Ind</connector>
+      </capabilities>
+    </port>
+    <port name="end1_5" type="ethernet" visual="t1s_board" mesh="port5">
+      <capabilities>
+        <speed unit="Mbps">100</speed>
+        <standard>100BASE-T1</standard>
+        <protocol>TSN</protocol>
+        <connector>JST-GH 2C</connector>
+      </capabilities>
+    </port>
+    <port name="end1_6" type="ethernet" visual="t1s_board" mesh="port6">
+      <capabilities>
+        <speed unit="Mbps">100</speed>
+        <standard>100BASE-T1</standard>
+        <protocol>TSN</protocol>
+        <connector>JST-GH 2C</connector>
+      </capabilities>
+    </port>
+    <port name="end1_7" type="ethernet" visual="t1s_board" mesh="port7">
+      <capabilities>
+        <speed unit="Mbps">100</speed>
+        <standard>100BASE-T1</standard>
+        <protocol>TSN</protocol>
+        <connector>JST-GH 2C</connector>
+      </capabilities>
+    </port>
+    <port name="end1_8" type="ethernet" visual="t1s_board" mesh="port8">
+      <capabilities>
+        <speed unit="Mbps">100</speed>
+        <standard>100BASE-T1</standard>
+        <protocol>TSN</protocol>
+        <connector>JST-GH 2C</connector>
+      </capabilities>
+    </port>
+    <port name="end1_9" type="ethernet" visual="t1s_board" mesh="port9">
+      <capabilities>
+        <speed unit="Mbps">100</speed>
+        <standard>100BASE-T1</standard>
+        <protocol>TSN</protocol>
+        <connector>JST-GH 2C</connector>
+      </capabilities>
+    </port>
+    <port name="end1_10" type="ethernet" visual="t1s_board" mesh="port10">
+      <capabilities>
+        <speed unit="Mbps">100</speed>
+        <standard>100BASE-T1</standard>
+        <protocol>TSN</protocol>
+        <connector>JST-GH 2C</connector>
+    </capabilities>
+    </port>
+    <port name="debug_t1s" type="UART" visual="t1s_board" mesh="cortex_debug"></port>
+
+    <port name="can1" type="CAN" visual="io_board" mesh="can1">
+      <capabilities>
+        <bitrate unit="bps">500000</bitrate>
+        <protocol>CAN-FD</protocol>
+        <connector>JST-GH 4C</connector>
+      </capabilities>
+    </port>
+    <port name="can2" type="CAN" visual="io_board" mesh="can2">
+      <capabilities>
+        <bitrate unit="bps">500000</bitrate>
+        <protocol>CAN-FD</protocol>
+        <connector>JST-GH 4C</connector>
+      </capabilities>
+    </port>
+    <port name="can3" type="CAN" visual="io_board" mesh="can3">
+      <capabilities>
+        <bitrate unit="bps">500000</bitrate>
+        <protocol>CAN-FD</protocol>
+        <connector>JST-GH 4C</connector>
+      </capabilities>
+    </port>
+    <port name="console_io" type="UART" visual="io_board" mesh="usbc0"></port>
+    <port name="uart_io" type="UART" visual="io_board" mesh="uart"></port>
+    <port name="i2c_io" type="I2C" visual="io_board" mesh="i2c"></port>
+    <port name="gnss_io" type="UART" visual="io_board" mesh="gnss"></port>
+
+    <port name="end0" type="ethernet" visual="navq95_base" mesh="rj45">
+      <capabilities>
+        <speed unit="Mbps">1000</speed>
+        <standard>1000BASE-T</standard>
+        <connector>8P8C</connector>
+      </capabilities>
+    </port>
+    <port name="usb1" type="USB" visual="navq95_base" mesh="usbc1"></port>
+    <port name="usb2" type="USB" visual="navq95_base" mesh="usbc0"></port>
+    <port name="pcie_m2_m" type="CARD" visual="navq95_base" mesh="key_m_m2"></port>
+    <port name="pcie_m2_b" type="CARD" visual="navq95_base" mesh="key_b_m2"></port>
+    <port name="debug" type="UART" visual="navq95_base" mesh="debug"></port>
+    <port name="console" type="UART" visual="navq95_base" mesh="console"></port>
+    <port name="rtc_bat" type="POWER" visual="navq95_base" mesh="bat">
+      <capabilities>
+        <voltage unit="V" min="2.8" max="3.2">3</voltage>
+        <current unit="A" max="10.5"/>
+        <power unit="mW" max="0.0003"/>
+        <connector>JST-SH 2C</connector>
+      </capabilities>
+    </port>
+    <port name="power" type="POWER" visual="navq95_base" mesh="power">
+      <capabilities>
+        <voltage unit="V" min="7" max="48">12</voltage>
+        <current unit="A" max="10.5"/>
+        <power unit="W" max="60"/>
+        <connector>Micro-Fit 3.0 2C</connector>
+      </capabilities>
+    </port>
+    <port name="sdcard" type="CARD" visual="navq95_base" mesh="sdcard"></port>
+    <port name="nanosim" type="CARD" visual="navq95_base" mesh="nanosim"></port>
+
+    <!-- ========== ANTENNA ========== -->
+    <antenna name="mlan0" type="wifi" visual="navq95_base" mesh="ant0">
+      <capabilities>
+        <band>2.4 GHz</band>
+        <band>5 GHz</band>
+        <gain unit="dBi">2.0</gain>
+        <standard>802.11ax</standard>
+        <protocol>WPA3</protocol>
+      </capabilities>
+    </antenna>
+    <antenna name="wpan0" type="802.15.4" visual="navq95_base" mesh="ant1">
+      <capabilities>
+        <band>2.4 GHz</band>
+        <gain unit="dBi">2.0</gain>
+        <standard>Bluetooth 5.4</standard>
+        <standard>802.15.4</standard>
+        <protocol>Thread</protocol>
+        <protocol>6LoWPAN</protocol>
+        <protocol>Matter</protocol>
+      </capabilities>
+    </antenna>
+    <antenna name="se51" type="NFC" visual="navq95_base" mesh="se">
+      <capabilities>
+        <band>13.5 MHz</band>
+        <protocol>NFC</protocol>
+        <gain unit="dBi">2.0</gain>
+      </capabilities>
+    </antenna>
+
+    <!-- ========== SENSORS ========== -->
+    <sensor name="bmi088_io">
+      <inertial type="accel_gyro">
+        <pose>0.025863 -0.021012 0.0081 0 0 0</pose>
+        <driver name="bmi088">
+          <axis-align x="-Y" y="X" z="Z"/>
+        </driver>
+      </inertial>
+    </sensor>
+    <sensor name="icm45686">
+      <inertial type="accel_gyro">
+        <pose>0.029 0.03475 -0.0028 3.14159265359 0 -1.57079632679</pose>
+        <driver name="icm45686">
+          <axis-align x="X" y="-Y" z="-Z"/>
+        </driver>
+      </inertial>
+    </sensor>
+    <sensor name="bmm350">
+      <em type="mag">
+        <pose>0.02975 0.04725 -0.0028 0 0 -1.57079632679</pose>
+        <driver name="bmm350">
+          <axis-align x="-Y" y="X" z="-Z"/>
+        </driver>
+      </em>
+    </sensor>
+    <sensor name="bmp390_hub">
+      <force type="pressure">
+        <pose>0.0295 0.0415 -0.0028 0 0 0</pose>
+        <driver name="bmp390"/>
+      </force>
+    </sensor>
+
+    <!-- ========== VISUALS ========== -->
+    <visual name="navq95_base">
+      <pose>-0.046 -0.046 -0.0008 0 0 0</pose>
+      <model href="models/0b7cdc0c-navq95v2.glb" sha="0b7cdc0cf02f36535889eb027270bd9d86fabae8a49e23608b7ad69241763e57"/>
+    </visual>
+    <visual name="io_board" toggle="IO Board">
+      <pose>0.015 -0.046 0.008 0 0 0</pose>
+      <model href="models/0823bad0-navq95v2_io.glb" sha="0823bad0990a123a61225ab0a9079264772dbdbf4cd3b9d56b89e27320736317"/>
+    </visual>
+    <visual name="t1s_board" toggle="T1 Switch Board">
+      <pose>-0.046 -0.046 -0.007 0 0 0</pose>
+      <model href="models/e40e548a-navq95v2_t1s.glb" sha="e40e548a2a774a4c68535177514e91deb29b02d7374dfedfe837140e5508c5ae"/>
+    </visual>
+
+    <!-- ========== REFERENCE FRAMES ========== -->
+    <frame name="board_origin">
+      <description>Main board origin</description>
+      <pose>0 0 0 0 0 0</pose>
+    </frame>
+  </comp>
+</hcdf>
