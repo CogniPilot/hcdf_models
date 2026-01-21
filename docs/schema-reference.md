@@ -80,7 +80,7 @@ Software running on a device, including firmware update configuration.
 
 ## Ports
 
-Ports define physical wired connection interfaces on a device. Each port has a type, position, and can reference a mesh in a visual for 3D interaction.
+Ports define physical wired connection interfaces on a device. Each port has a type, optional mesh reference for 3D visualization, and capabilities describing its electrical/protocol characteristics.
 
 ### Wired Port Types
 
@@ -92,16 +92,17 @@ Ports define physical wired connection interfaces on a device. Each port has a t
 - `USB` - Universal Serial Bus
 - `JTAG` - Joint Test Action Group (debug)
 - `SWD` - Serial Wire Debug
-- `power` - Power connector
+- `POWER` - Power connector
+- `CARD` - Card slot (SD, SIM, etc.)
 
 ### Port Definition
 
 ```xml
 <port name="ETH0" type="ethernet" visual="hub_board" mesh="ETH0">
-  <pose>x y z roll pitch yaw</pose>
-  <geometry>
-    <!-- optional: box, cylinder, or sphere for fallback visualization -->
-  </geometry>
+  <capabilities>
+    <speed unit="Mbps">1000</speed>
+    <standard>1000BASE-T</standard>
+  </capabilities>
 </port>
 ```
 
@@ -114,19 +115,111 @@ Ports define physical wired connection interfaces on a device. Each port has a t
 
 | Element | Required | Description |
 |---------|----------|-------------|
-| `<pose>` | Yes | Position and orientation: `x y z roll pitch yaw` (meters, radians) |
+| `<capabilities>` | No | Electrical/protocol characteristics (see below) |
+| `<pose>` | No | Position and orientation (only needed for fallback geometry) |
 | `<geometry>` | No | Fallback shape if no mesh reference |
+
+### Port Capabilities
+
+The `<capabilities>` element describes the electrical and protocol characteristics of a port.
+
+**When to use `POWER` type ports:** Use for dedicated power connections that carry only power (battery connectors, power distribution, barrel jacks). These have no data protocol.
+
+**When to use power capabilities on data ports:** Many data interfaces also carry power (PoE, PoDL, USB-PD, CAN power pins, I2C power). Add power capabilities to these data ports to document the power delivery specs alongside the data specs.
+
+#### Data Capabilities
+
+| Element | Port Types | Description |
+|---------|------------|-------------|
+| `<speed>` | ethernet | Network speed with `unit` attribute (typically "Mbps") |
+| `<bitrate>` | CAN | Bitrate with `unit` attribute (typically "bps") |
+| `<baud>` | UART | Baud rate with `unit` attribute (typically "baud") |
+| `<standard>` | ethernet | Physical layer standard (e.g., "1000BASE-T", "1000BASE-T1", "100BASE-TX") |
+| `<protocol>` | any | Protocol variants - can appear multiple times (e.g., "CAN-FD", "TSN", "USB-PD") |
+
+#### Power Capabilities (available on any port type)
+
+| Element | Attributes | Description |
+|---------|------------|-------------|
+| `<voltage>` | `unit`, `min`, `max` | Voltage with range; value is nominal (e.g., `<voltage unit="V" min="7" max="28">12</voltage>`) |
+| `<current>` | `unit`, `max` | Maximum current (e.g., `<current unit="A" max="3"/>`) |
+| `<power>` | `unit`, `max` | Maximum power in watts (e.g., `<power unit="W" max="36"/>`) |
+| `<capacity>` | `unit` | Energy capacity for batteries (e.g., `<capacity unit="Wh">55.5</capacity>`) |
+| `<connector>` | - | Physical connector type (e.g., "XT60", "RJ45", "USB-C", "JST-GH") |
 
 ### Port Examples
 
 ```xml
-<!-- Port with mesh reference (preferred) -->
-<port name="ETH0" type="ethernet" visual="hub_board" mesh="ETH0">
-  <pose>0.0225 -0.0155 -0.0085 0 0 0</pose>
+<!-- Ethernet with mesh reference and capabilities -->
+<port name="end0" type="ethernet" visual="hub_board" mesh="rj45">
+  <capabilities>
+    <speed unit="Mbps">1000</speed>
+    <standard>1000BASE-T</standard>
+  </capabilities>
 </port>
 
-<!-- Port with fallback geometry -->
+<!-- 100BASE-T1 Ethernet (automotive/industrial single-pair) -->
+<port name="end1_5" type="ethernet" visual="t1s_board" mesh="port5">
+  <capabilities>
+    <speed unit="Mbps">100</speed>
+    <standard>100BASE-T1</standard>
+  </capabilities>
+</port>
+
+<!-- 1000BASE-T1 Ethernet with Power over Data Lines (PoDL) -->
+<port name="end1_1" type="ethernet" visual="t1s_board" mesh="port1">
+  <capabilities>
+    <speed unit="Mbps">1000</speed>
+    <standard>1000BASE-T1</standard>
+    <protocol>PoDL</protocol>
+    <voltage unit="V" min="12" max="48">24</voltage>
+    <power unit="W" max="50"/>
+  </capabilities>
+</port>
+
+<!-- Standard Ethernet with PoE (Power over Ethernet) -->
+<port name="eth_poe" type="ethernet" visual="switch" mesh="eth0">
+  <capabilities>
+    <speed unit="Mbps">1000</speed>
+    <standard>1000BASE-T</standard>
+    <protocol>PoE+</protocol>
+    <voltage unit="V" min="44" max="57">48</voltage>
+    <power unit="W" max="30"/>
+  </capabilities>
+</port>
+
+<!-- CAN-FD port with power pins (common in automotive) -->
+<port name="can1" type="CAN" visual="io_board" mesh="can1">
+  <capabilities>
+    <bitrate unit="bps">500000</bitrate>
+    <protocol>CAN-FD</protocol>
+    <voltage unit="V" min="8" max="16">12</voltage>
+    <current unit="A" max="0.5"/>
+  </capabilities>
+</port>
+
+<!-- CAN port without power (data only) -->
+<port name="can2" type="CAN" visual="io_board" mesh="can2">
+  <capabilities>
+    <bitrate unit="bps">500000</bitrate>
+    <protocol>CAN-FD</protocol>
+  </capabilities>
+</port>
+
+<!-- UART/Serial port -->
+<port name="debug" type="UART" visual="main_board" mesh="debug">
+  <capabilities>
+    <baud unit="baud">115200</baud>
+    <protocol>RS-232</protocol>
+  </capabilities>
+</port>
+
+<!-- Port with fallback geometry (no mesh available) -->
 <port name="CAN0" type="CAN">
+  <capabilities>
+    <bitrate unit="bps">1000000</bitrate>
+    <protocol>CAN-FD</protocol>
+  </capabilities>
   <pose>-0.0225 -0.0155 -0.0085 0 0 0</pose>
   <geometry>
     <box>
@@ -134,13 +227,48 @@ Ports define physical wired connection interfaces on a device. Each port has a t
     </box>
   </geometry>
 </port>
+
+<!-- Simple port with mesh reference only (no capabilities) -->
+<port name="sdcard" type="CARD" visual="main_board" mesh="sdcard"></port>
+
+<!-- Power input port with voltage range and max draw -->
+<port name="pwr_in" type="POWER" visual="main_board" mesh="pwr">
+  <capabilities>
+    <voltage unit="V" min="7" max="28">12</voltage>
+    <current unit="A" max="3"/>
+    <power unit="W" max="36"/>
+    <connector>XT30</connector>
+  </capabilities>
+</port>
+
+<!-- Battery output port with capacity -->
+<port name="bat_out" type="POWER" visual="battery" mesh="output">
+  <capabilities>
+    <voltage unit="V" min="10.5" max="12.6">12</voltage>
+    <current unit="A" max="10"/>
+    <power unit="W" max="120"/>
+    <capacity unit="Wh">55.5</capacity>
+    <connector>XT60</connector>
+  </capabilities>
+</port>
+
+<!-- USB-C power delivery port -->
+<port name="usbc_pwr" type="USB" visual="main_board" mesh="usbc">
+  <capabilities>
+    <voltage unit="V" min="5" max="20">12</voltage>
+    <current unit="A" max="3"/>
+    <power unit="W" max="60"/>
+    <connector>USB-C</connector>
+    <protocol>USB-PD</protocol>
+  </capabilities>
+</port>
 ```
 
 ---
 
 ## Antennas
 
-Antennas define wireless connection interfaces.
+Antennas define wireless connection interfaces. Each antenna has a type, optional mesh reference for 3D visualization, and capabilities describing its RF characteristics.
 
 ### Wireless Types
 
@@ -150,9 +278,68 @@ Antennas define wireless connection interfaces.
 - `cellular` - Cellular (LTE, 5G)
 - `uwb` - Ultra-Wideband
 - `gnss` - GNSS antenna
+- `NFC` - Near-Field Communication
+
+### Antenna Definition
 
 ```xml
-<antenna name="wifi0" type="wifi">
+<antenna name="wifi0" type="wifi" visual="main_board" mesh="ant0">
+  <capabilities>
+    <band>2.4 GHz</band>
+    <band>5 GHz</band>
+    <standard>802.11ax</standard>
+    <protocol>WPA3</protocol>
+    <gain unit="dBi">3.5</gain>
+    <polarization>linear</polarization>
+  </capabilities>
+</antenna>
+```
+
+| Attribute | Required | Description |
+|-----------|----------|-------------|
+| `name` | Yes | Antenna identifier |
+| `type` | Yes | Antenna type (see list above) |
+| `visual` | No | Name of visual element containing the antenna mesh |
+| `mesh` | No | GLTF mesh node name within the visual (for highlighting) |
+
+| Element | Required | Description |
+|---------|----------|-------------|
+| `<capabilities>` | No | RF characteristics (see below) |
+| `<pose>` | No | Position and orientation (only needed for fallback geometry) |
+| `<geometry>` | No | Fallback shape if no mesh reference |
+
+### Antenna Capabilities
+
+The `<capabilities>` element describes the RF characteristics of an antenna. All child elements are optional and can appear multiple times where noted.
+
+| Element | Multiple | Description |
+|---------|----------|-------------|
+| `<band>` | Yes | Frequency band (e.g., "2.4 GHz", "5 GHz", "L1", "L2", "L5") |
+| `<standard>` | Yes | PHY/MAC standard (e.g., "802.11ax", "802.15.4", "Bluetooth 5.4") |
+| `<protocol>` | Yes | Higher-layer protocol (e.g., "Thread", "6LoWPAN", "Matter", "WPA3") |
+| `<gain>` | No | Antenna gain with `unit` attribute (typically "dBi") |
+| `<polarization>` | No | Polarization type (e.g., "linear", "circular", "RHCP", "LHCP") |
+
+**Semantic distinction:**
+- **`band`**: RF frequency bands the antenna operates on
+- **`standard`**: PHY/MAC layer specifications (IEEE standards, Bluetooth specs)
+- **`protocol`**: Higher-layer networking protocols built on top of the standards
+
+### Antenna Examples
+
+```xml
+<!-- Antenna with mesh reference (preferred) -->
+<antenna name="wifi0" type="wifi" visual="main_board" mesh="ant0">
+  <capabilities>
+    <band>2.4 GHz</band>
+    <band>5 GHz</band>
+    <standard>802.11ax</standard>
+    <gain unit="dBi">2.0</gain>
+  </capabilities>
+</antenna>
+
+<!-- Antenna with fallback geometry -->
+<antenna name="lora0" type="lora">
   <pose>0.02 0 0.01 0 0 0</pose>
   <geometry>
     <cylinder>
@@ -160,6 +347,57 @@ Antennas define wireless connection interfaces.
       <length>0.015</length>
     </cylinder>
   </geometry>
+  <capabilities>
+    <band>915 MHz</band>
+    <gain unit="dBi">5.0</gain>
+  </capabilities>
+</antenna>
+
+<!-- Tri-radio module (Wi-Fi 6 / Bluetooth 5.4 / IEEE 802.15.4) -->
+<!-- Example: NXP IW612 (LBES5PL2EL-923) with two antennas -->
+<antenna name="mlan0" type="wifi" visual="main_board" mesh="ant0">
+  <capabilities>
+    <band>2.4 GHz</band>
+    <band>5 GHz</band>
+    <standard>802.11ax</standard>
+    <standard>Bluetooth 5.4</standard>
+    <standard>802.15.4</standard>
+    <protocol>Thread</protocol>
+    <protocol>6LoWPAN</protocol>
+    <protocol>Matter</protocol>
+    <gain unit="dBi">2.0</gain>
+  </capabilities>
+</antenna>
+
+<antenna name="bt" type="bluetooth" visual="main_board" mesh="ant1">
+  <capabilities>
+    <band>2.4 GHz</band>
+    <standard>Bluetooth 5.4</standard>
+    <standard>802.15.4</standard>
+    <protocol>Thread</protocol>
+    <protocol>6LoWPAN</protocol>
+    <gain unit="dBi">2.0</gain>
+  </capabilities>
+</antenna>
+
+<!-- GNSS antenna with multiple frequency bands -->
+<antenna name="gnss0" type="gnss" visual="main_board" mesh="gnss_ant">
+  <capabilities>
+    <band>L1</band>
+    <band>L2</band>
+    <band>L5</band>
+    <gain unit="dBi">3.0</gain>
+    <polarization>RHCP</polarization>
+  </capabilities>
+</antenna>
+
+<!-- NFC antenna -->
+<antenna name="nfc0" type="NFC" visual="main_board" mesh="nfc">
+  <capabilities>
+    <band>13.56 MHz</band>
+    <protocol>NFC</protocol>
+    <gain unit="dBi">2.0</gain>
+  </capabilities>
 </antenna>
 ```
 
@@ -200,7 +438,7 @@ HCDF uses two connectivity models based on the network type:
 | Model | Use Case | Examples |
 |-------|----------|----------|
 | **Links** | Point-to-point connections (with optional forwarding) | Ethernet, USB, UART |
-| **Buses** | Shared medium with multiple participants | CAN, I2C, SPI |
+| **Buses** | Shared medium with multiple participants | CAN, I2C, SPI, Power |
 
 ### Key Differences
 
@@ -310,7 +548,7 @@ For daisy-chained Ethernet where devices forward packets:
 
 ## Buses (Shared Medium)
 
-Buses describe shared communication media where multiple devices are electrically connected to the same wire(s). Use buses for CAN, I2C, SPI, and similar shared media.
+Buses describe shared media where multiple devices are electrically connected to the same wire(s). Use buses for CAN, I2C, SPI, power distribution, and similar shared networks.
 
 ### CAN Bus
 
@@ -361,6 +599,55 @@ SPI can be modeled as a bus (shared MISO/MOSI/CLK) or as links (per chip-select)
   <participant device="hub" port="SPI0" role="controller"/>
   <participant device="imu" port="SPI0" cs="0"/>
   <participant device="flash" port="SPI0" cs="1"/>
+</bus>
+```
+
+### Power Bus
+
+Power buses model power distribution networks where multiple devices share a voltage rail. The bus references power ports on devices, which define their electrical specifications (voltage range, max current, max power). This avoids duplicating electrical specs on both the port and the bus.
+
+```xml
+<bus name="main_12v" type="power">
+  <voltage>12</voltage>
+  <participant device="battery" port="bat_out" role="source"/>
+  <participant device="navq95" port="pwr_in" role="sink"/>
+  <participant device="hub_a" port="pwr_in" role="sink"/>
+  <participant device="sensor" port="pwr_in" role="sink"/>
+</bus>
+```
+
+| Element/Attribute | Description |
+|-------------------|-------------|
+| `<voltage>` | Nominal bus voltage (V) |
+| `role="source"` | Energy provider (battery, PSU, solar panel) |
+| `role="sink"` | Energy consumer |
+
+**Power budget calculation:** The bus voltage combined with each device's port capabilities enables:
+- **Compatibility check**: Verify source voltage falls within each sink's min/max range
+- **Power budget**: Sum of sink `power max` values vs source `power max`
+- **Current budget**: Total current draw vs source max current
+- **Connector validation**: Warn if connector types don't match
+
+#### Multi-Rail Power Distribution
+
+For systems with multiple voltage rails:
+
+```xml
+<!-- Main 12V rail from battery -->
+<bus name="main_12v" type="power">
+  <voltage>12</voltage>
+  <participant device="battery" port="bat_out" role="source"/>
+  <participant device="navq95" port="pwr_12v" role="sink"/>
+  <participant device="pdb" port="pwr_in" role="sink"/>
+</bus>
+
+<!-- 5V rail from power distribution board -->
+<bus name="rail_5v" type="power">
+  <voltage>5</voltage>
+  <participant device="pdb" port="5v_out" role="source"/>
+  <participant device="sensor_a" port="pwr_in" role="sink"/>
+  <participant device="sensor_b" port="pwr_in" role="sink"/>
+  <participant device="sensor_c" port="pwr_in" role="sink"/>
 </bus>
 ```
 
