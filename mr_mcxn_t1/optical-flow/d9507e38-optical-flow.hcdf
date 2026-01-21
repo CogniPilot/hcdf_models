@@ -4,51 +4,67 @@
     <description>Spinali optical flow sensor assembly with MCXN947 T1 hub</description>
 
     <!-- ========== PORTS ========== -->
-
     <!-- T1 Ethernet port on hub board -->
-    <port name="ETH0" type="ethernet" visual="hub_board" mesh="ETH0">
-      <pose>0.0225 -0.0155 -0.0085 0 0 0</pose>
-      <geometry>
-        <box>
-          <size>0.006 0.004 0.003</size>
-        </box>
-      </geometry>
+    <port name="eth0" type="ethernet" visual="hub_board" mesh="eth0">
+      <capabilities>
+        <speed unit="Mbps">100</speed>
+        <standard>100BASE-T1</standard>
+        <protocol>TSN</protocol>
+        <protocol>PaE</protocol>
+        <connector>Micro-Lock Plus 2.0 4C</connector>
+        <voltage unit="V" min="7" max="48">12</voltage>
+        <current unit="A" max="3.4"/>
+        <power unit="W" max="10"/>
+      </capabilities>
     </port>
 
     <!-- CAN port 0 on hub board -->
-    <port name="CAN0" type="CAN" visual="hub_board" mesh="CAN0">
-      <pose>-0.0225 -0.0155 -0.0085 0 0 0</pose>
-      <geometry>
-        <box>
-          <size>0.005 0.004 0.003</size>
-        </box>
-      </geometry>
+    <port name="can0_a" type="CAN" visual="hub_board" mesh="can0_a">
+      <capabilities>
+        <bitrate unit="bps">500000</bitrate>
+        <protocol>CAN-FD</protocol>
+        <connector>JST-GH 4C</connector>
+      </capabilities>
     </port>
-
+    <port name="can0_b" type="CAN" visual="hub_board" mesh="can0_b">
+      <capabilities>
+        <bitrate unit="bps">500000</bitrate>
+        <protocol>CAN-FD</protocol>
+        <connector>JST-GH 4C</connector>
+      </capabilities>
+    </port>
     <!-- CAN port 1 on hub board -->
-    <port name="CAN1" type="CAN" visual="hub_board" mesh="CAN1">
-      <pose>-0.0175 -0.0155 -0.0085 0 0 0</pose>
-      <geometry>
-        <box>
-          <size>0.005 0.004 0.003</size>
-        </box>
-      </geometry>
+    <port name="can1_a" type="CAN" visual="hub_board" mesh="can1_a">
+      <capabilities>
+        <bitrate unit="bps">500000</bitrate>
+        <protocol>CAN-FD</protocol>
+        <connector>JST-GH 4C</connector>
+      </capabilities>
     </port>
-
+    <port name="can1_b" type="CAN" visual="hub_board" mesh="can1_b">
+      <capabilities>
+        <bitrate unit="bps">500000</bitrate>
+        <protocol>CAN-FD</protocol>
+        <connector>JST-GH 4C</connector>
+      </capabilities>
+    </port>
     <!-- Debug UART port on hub board -->
-    <port name="DEBUG" type="UART" visual="hub_board" mesh="DEBUG">
-      <pose>0.0175 -0.0155 -0.0085 0 0 0</pose>
-      <geometry>
-        <box>
-          <size>0.004 0.003 0.002</size>
-        </box>
-      </geometry>
+    <port name="debug" type="UART" visual="hub_board" mesh="debug">
+      <capabilities>
+        <baud unit="baud">115200</baud>
+      </capabilities>
+    </port>
+    <port name="usbc" type="USB" visual="hub_board" mesh="usbc">
+      <capabilities>
+        <connector>USBC</connector>
+        <voltage unit="V" min="4.75" max="5.25">5</voltage>
+        <current unit="A" max="2.4"/>
+        <power unit="W" max="6"/>
+      </capabilities>
     </port>
 
     <!-- ========== SENSORS ========== -->
-
-    <!-- ICM-45686 IMU on hub board (800Hz, primary) -->
-    <sensor name="imu_hub">
+    <sensor name="icm45686_hub">
       <inertial type="accel_gyro">
         <pose>0.016125 -0.00085 -0.0075 0 0 0</pose>
         <driver name="icm45686">
@@ -56,28 +72,6 @@
         </driver>
       </inertial>
     </sensor>
-
-    <!-- ICM-45686 IMU on optical flow board (400Hz, secondary) -->
-    <sensor name="icm45686_oflo">
-      <inertial type="accel_gyro">
-        <pose>-0.0188 0 0.00125 -1.5708 0 0</pose>
-        <driver name="icm45686">
-          <axis-align x="X" y="Z" z="-Y"/>
-        </driver>
-      </inertial>
-    </sensor>
-
-    <!-- ICM-42688 IMU on optical flow board (legacy/backup) -->
-    <sensor name="icm42688_oflo">
-      <inertial type="accel_gyro">
-        <pose>0.0083 0 0.00125 0 0 0</pose>
-        <driver name="icm42688">
-          <axis-align x="X" y="Y" z="Z"/>
-        </driver>
-      </inertial>
-    </sensor>
-
-    <!-- BMM350 magnetometer on hub board -->
     <sensor name="bmm350_hub">
       <em type="mag">
         <pose>0.02085 0.00064 -0.0098 0 0 0</pose>
@@ -86,16 +80,28 @@
         </driver>
       </em>
     </sensor>
-
-    <!-- BMP581 barometer on hub board -->
     <sensor name="bmp581_hub">
       <force type="pressure">
         <pose>0.015 0.005 -0.0095 0 0 0</pose>
         <driver name="bmp581"/>
       </force>
     </sensor>
-
-    <!-- PAA3905 optical flow sensor -->
+    <sensor name="icm45686_oflo">
+      <inertial type="accel_gyro">
+        <pose>-0.0188 0 0.00125 0 0 0</pose>
+        <driver name="icm45686">
+          <axis-align x="X" y="Y" z="Z"/>
+        </driver>
+      </inertial>
+    </sensor>
+    <sensor name="icm42688_oflo">
+      <inertial type="accel_gyro">
+        <pose>0.0083 0 0.00125 0 0 0</pose>
+        <driver name="icm42688">
+          <axis-align x="X" y="Y" z="Z"/>
+        </driver>
+      </inertial>
+    </sensor>
     <sensor name="paa3905">
       <optical type="optical_flow">
         <pose>-0.0005 -0.0002 0.002125 0 0 0</pose>
@@ -112,15 +118,13 @@
         </fov>
       </optical>
     </sensor>
-
-    <!-- AFBR-S50 time-of-flight sensor (8x8 array) -->
     <sensor name="afbr_s50lx85d">
       <optical type="tof">
         <pose>-0.008 0 0.003 0 0 0</pose>
         <driver name="afbr_s50"/>
         <!-- Collector: rectangular FOV with squint angle -->
         <fov name="collector" color="#4488ff">
-          <pose>0 0 0 0 0.0471 0</pose>
+          <pose>0 0 0 0 -0.0471 0</pose>
           <geometry>
             <pyramidal_frustum>
               <near>0.05</near>
@@ -145,36 +149,27 @@
     </sensor>
 
     <!-- ========== VISUALS ========== -->
-
-    <!-- Optical flow board PCB -->
+    <visual name="hub_board">
+      <pose>0 0 -0.00945 1.5708 0 1.5708</pose>
+      <model href="models/08053a23-mcxnt1hub.glb" sha="08053a2341e36df2e279c80e3c5ec5639c96e5d2f7d680fae05f31fbec1d5dfc"/>
+    </visual>
     <visual name="optical_flow_board">
       <pose>0 0 -0.0008 1.5708 0 1.5708</pose>
       <model href="models/72eef172-optical_flow.glb" sha="72eef1724ebbf6d7df57edba6465ef9e35ac25a4db10365ef29b9a2b39d0636a"/>
     </visual>
-
-    <!-- MCXN947 T1 Hub board PCB -->
-    <visual name="hub_board">
-      <pose>0 0 -0.00945 1.5708 0 1.5708</pose>
-      <model href="models/fc0bc0ac-mcxnt1hub.glb" sha="fc0bc0acf368879671c3b21e0ca06ff8ec43219f6d706ea3b019dfda4bbbe14b"/>
-    </visual>
-
-    <!-- Case visuals (toggle group) -->
     <visual name="mcxnt1hub_spacer" toggle="case">
       <pose>0.020 -0.01525 -0.0008 0 3.14159 0</pose>
       <model href="models/c07cf1f4-mcxnt1hub_spacer.glb" sha="c07cf1f44bb4a6a6e778e94bdae3a9a380243a52acdbed5ff5d79b58d27ef6ac"/>
     </visual>
-
     <visual name="mcxnt1hub_base" toggle="case">
       <pose>0 0 -0.014 0 3.14159 -1.5708</pose>
       <model href="models/86d9c8c8-mcxnt1hub_base.glb" sha="86d9c8c84b18be7582be497788cfff9dd1c1801d31d0e855335dc3c155003c75"/>
     </visual>
 
     <!-- ========== REFERENCE FRAMES ========== -->
-
     <frame name="board_origin">
-      <description>Main board origin (spinali_optical_flow_link)</description>
+      <description>Main board origin</description>
       <pose>0 0 0 0 0 0</pose>
     </frame>
-
   </comp>
 </hcdf>
