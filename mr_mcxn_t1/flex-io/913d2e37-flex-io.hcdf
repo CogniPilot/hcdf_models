@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<hcdf version="2.0">
+  <comp name="rtk-gnss-assembly" role="sensor">
+    <description>Flex IO board with MCXN947 T1 hub</description>
+
+    <!-- ========== PORTS ========== -->
+    <!-- T1 Ethernet port on hub board -->
+    <port name="eth0" type="ethernet" visual="hub_board" mesh="eth0">
+      <capabilities>
+        <speed unit="Mbps">100</speed>
+        <standard>100BASE-T1</standard>
+        <protocol>TSN</protocol>
+        <protocol>PaE</protocol>
+        <connector>Micro-Lock Plus 2.0 4C</connector>
+        <voltage unit="V" min="7" max="48">12</voltage>
+        <current unit="A" max="3.4"/>
+        <power unit="W" max="10"/>
+      </capabilities>
+    </port>
+
+    <!-- CAN port 0 on hub board -->
+    <port name="can0_a" type="CAN" visual="hub_board" mesh="can0_a">
+      <capabilities>
+        <bitrate unit="bps">500000</bitrate>
+        <protocol>CAN-FD</protocol>
+        <connector>JST-GH 4C</connector>
+      </capabilities>
+    </port>
+    <port name="can0_b" type="CAN" visual="hub_board" mesh="can0_b">
+      <capabilities>
+        <bitrate unit="bps">500000</bitrate>
+        <protocol>CAN-FD</protocol>
+        <connector>JST-GH 4C</connector>
+      </capabilities>
+    </port>
+    <!-- CAN port 1 on hub board -->
+    <port name="can1_a" type="CAN" visual="hub_board" mesh="can1_a">
+      <capabilities>
+        <bitrate unit="bps">500000</bitrate>
+        <protocol>CAN-FD</protocol>
+        <connector>JST-GH 4C</connector>
+      </capabilities>
+    </port>
+    <port name="can1_b" type="CAN" visual="hub_board" mesh="can1_b">
+      <capabilities>
+        <bitrate unit="bps">500000</bitrate>
+        <protocol>CAN-FD</protocol>
+        <connector>JST-GH 4C</connector>
+      </capabilities>
+    </port>
+    <!-- Debug UART port on hub board -->
+    <port name="debug" type="UART" visual="hub_board" mesh="debug">
+      <capabilities>
+        <baud unit="baud">115200</baud>
+      </capabilities>
+    </port>
+    <port name="usbc" type="USB" visual="hub_board" mesh="usbc">
+      <capabilities>
+        <connector>USBC</connector>
+        <voltage unit="V" min="4.75" max="5.25">5</voltage>
+        <current unit="A" max="2.4"/>
+        <power unit="W" max="6"/>
+      </capabilities>
+    </port>
+
+    <port name="uart2" type="UART" visual="flex-io_board" mesh="uart2"></port>
+    <port name="uart1" type="UART" visual="flex-io_board" mesh="uart1"></port>
+    <port name="i2c1" type="I2C" visual="flex-io_board" mesh="i2c1"></port>
+    <port name="i2c2" type="I2C" visual="flex-io_board" mesh="i2c2"></port>
+    <port name="spi1" type="SPI" visual="flex-io_board" mesh="spi1"></port>
+    <port name="spi2" type="SPI" visual="flex-io_board" mesh="spi2"></port>
+    <port name="gps" type="UART" visual="flex-io_board" mesh="gps"></port>
+    <port name="qdec" type="UART" visual="flex-io_board" mesh="qdec"></port>
+    <port name="esc1" type="UART" visual="flex-io_board" mesh="esc1"></port>
+    <port name="esc2" type="UART" visual="flex-io_board" mesh="esc2"></port>
+    <port name="rtc_vbat" type="POWER" visual="flex-io_board" mesh="rtc_bat">
+      <capabilities>
+        <voltage unit="V" min="1.5" max="3.6">3.0</voltage>
+        <current unit="uA" max="22"/>
+        <power unit="uW" max="80"/>
+        <connector>JST-SH 2P</connector>
+      </capabilities>
+    </port>
+
+    <!-- ========== SENSORS ========== -->
+    <sensor name="icm45686_hub">
+      <inertial type="accel_gyro">
+        <pose>0.016125 -0.00085 -0.0075 0 0 0</pose>
+        <driver name="icm45686">
+          <axis-align x="X" y="Y" z="Z"/>
+        </driver>
+      </inertial>
+    </sensor>
+    <sensor name="bmm350_hub">
+      <em type="mag">
+        <pose>0.02085 0.00064 -0.0098 0 0 0</pose>
+        <driver name="bmm350">
+          <axis-align x="X" y="Y" z="Z"/>
+        </driver>
+      </em>
+    </sensor>
+    <sensor name="bmp581_hub">
+      <force type="pressure">
+        <pose>0.015 0.005 -0.0095 0 0 0</pose>
+        <driver name="bmp581"/>
+      </force>
+    </sensor>
+
+    <!-- ========== VISUALS ========== -->
+    <visual name="hub_board">
+      <pose>0 0 -0.00945 1.5708 0 1.5708</pose>
+      <model href="models/08053a23-mcxnt1hub.glb" sha="08053a2341e36df2e279c80e3c5ec5639c96e5d2f7d680fae05f31fbec1d5dfc"/>
+    </visual>
+    <visual name="flex-io_board">
+      <pose>0 0 -0.0008 1.5708 0 1.5708</pose>
+      <model href="models/29c1ffc3-flex_io.glb" sha="29c1ffc38211d0059eded0cd711b30a5946954933b5db52b1bc3c011e783e0d6"/>
+    </visual>
+    <visual name="mcxnt1hub_spacer" toggle="case">
+      <pose>0.020 -0.01525 -0.0008 0 3.14159 0</pose>
+      <model href="models/c07cf1f4-mcxnt1hub_spacer.glb" sha="c07cf1f44bb4a6a6e778e94bdae3a9a380243a52acdbed5ff5d79b58d27ef6ac"/>
+    </visual>
+    <visual name="mcxnt1hub_base" toggle="case">
+      <pose>0 0 -0.014 0 3.14159 -1.5708</pose>
+      <model href="models/86d9c8c8-mcxnt1hub_base.glb" sha="86d9c8c84b18be7582be497788cfff9dd1c1801d31d0e855335dc3c155003c75"/>
+    </visual>
+
+    <!-- ========== REFERENCE FRAMES ========== -->
+    <frame name="board_origin">
+      <description>Main board origin</description>
+      <pose>0 0 0 0 0 0</pose>
+    </frame>
+  </comp>
+</hcdf>
